@@ -14,14 +14,16 @@ For any characters *a* and *b* and for any strings *r* and *s* we have following
 
 $$
 \begin{align}
-\partial_a \varepsilon &= \emptyset \\
-\partial_a a &= \epsilon \\
-\partial_a b &= \emptyset \text{ for }(a \neq b) \\
-\partial_a (r \cdot s) &= \partial_a r \mid \nu(r) \cdot \partial_a s \\
-\partial_a (r \mid s) &= \partial_a r \mid \partial_a s \\
-\partial_a (r*) &= \partial_a r \cdot r*
+\partial_a \varepsilon &= \emptyset & \\
+\partial_a a &= \epsilon & \\
+\partial_a b &= \emptyset & \text{ for }(a \neq b) \\
+\partial_a (r \cdot s) &= \partial_a r \mid \nu(r) \cdot \partial_a s & \\
+\partial_a (r \mid s) &= \partial_a r \mid \partial_a s & \\
+\partial_a (r*) &= \partial_a r \cdot r* &
 \end{align}
 $$
+
+## Definition and rules
 
 ## Code and usage
 
