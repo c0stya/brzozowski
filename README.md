@@ -6,11 +6,13 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 ## Definition
 
-The derivative of a language $L \subset \Sigma\^*$ with respect to a string $u \in \Sigma\^*$ is a language $\partial_u L = \lbrace v \mid u \cdot v \in L \rbrace$.
+The derivative of a language $L \subset \Sigma*$ with respect to a string $u \in \Sigma*$ is a language $\partial_u L = \lbrace v \mid u \cdot v \in L \rbrace$.
 
 ## Code and usage
 
-This code implements only three operators: concatenation ($\cdot$), summation ('|'), and Kleene star($).
+This code implements only three operators. There are concatenation ($\cdot$), summation ('|'), and Kleene star($).
+
+The usage is straighforward:
 
 ```bash
 > python match.py '(c|b)at' 'cat'
@@ -19,6 +21,15 @@ This code implements only three operators: concatenation ($\cdot$), summation ('
 ((((∅|∅)·a)|ϵ)·t)
 (((((∅|∅)·a)|∅)·t)|ϵ)
 True
+```
+
+```bash
+> python match.py '(c|b)at' 'sat'
+(((c|b)·a)·t)
+(((∅|∅)·a)·t)
+(((∅|∅)·a)·t)
+(((∅|∅)·a)·t)
+False
 ```
 
 ## Why do we need it
