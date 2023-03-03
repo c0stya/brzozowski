@@ -6,7 +6,7 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 ## Definition
 
-The derivative of a language $L \subset \Sigma*$ with respect to a string $u \in \Sigma*$ is a language $\partial_u L = \{v | u \cdot v \in L\}$.
+The derivative of a language $L \subset \Sigma^*$ with respect to a string $u \in \Sigma^*$ is a language $\partial_u L = {v \mid u \cdot v \in L}$.
 
 ## Code and usage
 
