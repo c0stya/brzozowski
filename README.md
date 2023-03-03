@@ -10,13 +10,16 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 The derivative of a language $L \subset \Sigma*$ with respect to a string $u \in \Sigma*$ is a language $\partial_u L = \lbrace v \mid u \cdot v \in L \rbrace$.
 
-For any characters $a$ and $b$ and for any strings $r$ and $s$ we have following rules:
+For any characters *a* and *b* and for any strings *r* and *s* we have following rules:
 
 $$
 \begin{align}
-\partial_a \varepsilon &= \emptyset
-\partial_a a &= \epsilon
-\partial_a b &= \emptyset \text{ for }(a \neq b)
+\partial_a \varepsilon &= \emptyset \\
+\partial_a a &= \epsilon \\
+\partial_a b &= \emptyset \text{ for }(a \neq b) \\
+\partial_a (r \cdot s) &= \partial_a r \mid \nu(r) \cdot \partial_a s \\
+\partial_a (r \mid s) &= \partial_a r \mid \partial_a s \\
+\partial_a (r*) &= \partial_a r \cdot r*
 \end{align}
 $$
 
