@@ -76,9 +76,11 @@ $$
 
 To find a match we have to check if the derivative of the regex $r$ with respect to string $u$ is *nullable*:
 
-$\nu(\partial_{u} r) = \epsilon$
+$$
+\nu(\partial_{u} r) = \epsilon
+$$
 
-## Example 
+## Example
 
 Let's check if word $cat$ matches the regexp $(c|b)at$. Obviously it is because the regex defines a language of just two strings $cat$ and $bat$. Anyway, let's do it formally.
 
