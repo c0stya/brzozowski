@@ -10,7 +10,7 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 The derivative of a language $L \subset \Sigma*$ with respect to a string $u \in \Sigma*$ is a language $\partial_u L = \lbrace v \mid u \cdot v \in L \rbrace$.
 
-For any characters *a* and *b* and for any strings *r* and *s* we have following rules:
+For any characters *a* and *b* and for any regular expressions *r* and *s* we have following rules:
 
 $$
 \begin{align}
@@ -21,6 +21,34 @@ $$
 \partial_a (r \mid s) &= \partial_a r \mid \partial_a s & \\
 \partial_a (r*) &= \partial_a r \cdot r* &
 \end{align}
+$$
+
+where the function $\nu(r)$ checks if the language defined by regular expression contains empty string ($\epsilon$). The recursive definition is:
+
+$$
+\begin{align}
+\nu(\varepsilon) &= \varepsilon \\
+\nu(\varepsilon) &= \emptyset \\
+\nu(\emptyset) &= \emptyset \\
+\nu(r \cdot s) &= \nu(r) \cdot \nu(s) \\
+\nu(r \mid s) &= \nu(r) \mid \nu(s) \\
+\nu(r*) &= \varepsilon
+\end{align}
+$$
+
+We need two rules with respect to strings to complete the rule set:
+
+$$
+\begin{align}
+\partial_\varepsilon r &= r \\
+\partial_{ua} = \partial_{a} \partial_{u} r
+\end{align}
+$$
+
+To find a match we have to check if the derivative of the regex $r$ with respect to string $u$ is *nullable*:
+
+$$
+ \nu(\partial_{u} r) = \epsilon
 $$
 
 ## Definition and rules
