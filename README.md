@@ -10,7 +10,12 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 This code implements only three operators. There are concatenation ($\cdot$), summation ('|'), and Kleene star(*).
 
-The usage is straighforward:
+The usage is straightforward:
+```
+> python match.py <regex> <string>
+```
+
+E.g.
 
 ```bash
 > python match.py '(c|b)at' 'cat'
