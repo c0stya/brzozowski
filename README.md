@@ -59,8 +59,8 @@ where the function $\nu(r)$ checks if the language defined by regular expression
 $$
 \begin{align}
 \nu(\varepsilon) &= \varepsilon \\
-\nu(\varepsilon) &= \emptyset \\
 \nu(\emptyset) &= \emptyset \\
+\nu(a) &= \emptyset \\
 \nu(r \cdot s) &= \nu(r) \cdot \nu(s) \\
 \nu(r \mid s) &= \nu(r) \mid \nu(s) \\
 \nu(r*) &= \varepsilon
