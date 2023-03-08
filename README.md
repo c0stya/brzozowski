@@ -10,7 +10,7 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 ## Usage
 
-This code implements only three operators. There are concatenation ($\cdot$), alteration ($\mid$), and Kleene star($*$).
+This code implements only three operators. There are concatenation ($\cdot$), alternation ($\mid$), and Kleene star($*$).
 
 The usage is straightforward:
 ```
