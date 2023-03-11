@@ -121,7 +121,7 @@ The `match.py` invokes the following functions to find out if a string matches a
 2. `infix_to_postfix`: converts the augmented regex to a [postfix expression](https://en.wikipedia.org/wiki/Reverse_Polish_notation).
 3. `postfix_to_tree`: converts postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree).
 4. `match`: invokes `deriv` for each token of the input string. Then evaluates the regex with `nullable`.
-    - `deriv`: 4.1 takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
+    - `deriv`: takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
     - `nullable`: checks if the resulting regex (binary tree) is nullable. If it is nullable then we found a match.
 
 ## Why do we need it
