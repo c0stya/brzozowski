@@ -3,7 +3,10 @@ import sys
 prec = {'(': 0, '|': 1, '·': 2, '*': 3}
 
 
+# Add the concatenation operator · to the regexp, make an empty string explicit
 def augment(src):
+    if not src:
+        return 'ϵ'
     dst = []
     for i in range(len(src)):
         if i > 0 and not (src[i] in '|)*' or src[i - 1] in '(|'):
@@ -15,14 +18,11 @@ def augment(src):
 
 def inorder(root):
     if root is None:
-        return
+        return ''
+    out = inorder(root.l) + root.c + inorder(root.r)
     if root.c in '|·*':
-        print('(', end='')
-    inorder(root.l)
-    print(root.c, end='')
-    inorder(root.r)
-    if root.c in '|·*':
-        print(')', end='')
+        return '(' + out + ')'
+    return out
 
 
 def infix_to_postfix(exp):
@@ -62,7 +62,6 @@ def postfix_to_tree(postfix):
         return
 
     stack = []
-
     for c in postfix:
         if c in "|·":
             r, l = stack.pop(), stack.pop()
@@ -95,9 +94,9 @@ def nullable(node):
         return False
 
 
+# take a derivative with respect of a character (inplace)
 def deriv(root, c):
     stack = [root]
-
     while len(stack) > 0:
         node = stack.pop()
         if node is None or node.c == '∅':   # ∂ₐ(∅)     = ∅
@@ -130,11 +129,15 @@ def deriv(root, c):
     return root
 
 
-def match(node, string):
-    inorder(node); print()
+def match(regex, string, show_inference=False):
+    node = postfix_to_tree(infix_to_postfix(augment(regex)))
+
+    if show_inference:
+        print(inorder(node))
     for c in string:
         deriv(node, c)
-        inorder(node); print()
+        if show_inference:
+            print(inorder(node))
     return nullable(node)
 
 
@@ -143,5 +146,4 @@ if __name__ == '__main__':
         print("Usage: {} regexp string".format(sys.argv[0]))
         sys.exit(1)
 
-    root = postfix_to_tree(infix_to_postfix(augment(sys.argv[1])))
-    print(match(root, sys.argv[2]))
+    print(match(sys.argv[1], sys.argv[2], show_inference=True))

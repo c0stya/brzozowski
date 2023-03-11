@@ -111,6 +111,19 @@ $$
 
 So $\partial_{cat}\left[(c \mid b)\cdot a \cdot t\right] = \epsilon$ is *nullable* and the word $cat$ matches the regexp $(c \mid b)\cdot a \cdot t$.
 
+## Algorithm
+
+There are several ways to implement the derivatives. Some implementations follow a pure functional style. Here instead I use good old imperative style to avoid hidden logic.
+
+The `match.py` invokes the following functions to find out if a string matches against a regex:
+
+1. `agument`: extends the input regex with an explicit concatenation operator ($\cdot$): $c*at \to c * \cdot a \cdot t$.
+2. `infix_to_postfix`: converts the augmented regex to a [postfix expression](https://en.wikipedia.org/wiki/Reverse_Polish_notation).
+3. `postfix_to_tree`: converts postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree).
+4. `match`: invokes `deriv` for each token of the input string. Then evaluates the regex with `nullable`.
+    - `deriv`: 4.1 takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
+    - `nullable`: checks if the resulting regex (binary tree) is nullable. If it is nullable then we found a match.
+
 ## Why do we need it
 
 1. It is fun
