@@ -117,9 +117,9 @@ There are several ways to implement the derivatives. Some implementations follow
 
 The `match.py` invokes the following functions to find out if a string matches against a regex:
 
-1. `agument`: extends the input regex with an explicit concatenation operator ($\cdot$): $c*at \to c * \cdot a \cdot t$.
+1. `augment`: extends the input regex with an explicit concatenation operator ($\cdot$): $c*at \to c * \cdot a \cdot t$.
 2. `infix_to_postfix`: converts the augmented regex to a [postfix expression](https://en.wikipedia.org/wiki/Reverse_Polish_notation).
-3. `postfix_to_tree`: converts postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree).
+3. `postfix_to_tree`: converts the postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree).
 4. `match`: invokes `deriv` for each token of the input string. Then evaluates the regex with `nullable`.
     - `deriv`: takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
     - `nullable`: checks if the resulting regex (binary tree) is nullable. If it is nullable then we found a match.
@@ -127,7 +127,7 @@ The `match.py` invokes the following functions to find out if a string matches a
 ## Why do we need it
 
 1. It is fun
-2. Using this technique we can construct a very efficient automaton called [minimal DFA](https://en.wikipedia.org/wiki/DFA_minimization). There are some considerations though but in some cases such construction can be very handy.
+2. Using this technique we can construct a very efficient automaton close to what is called [minimal DFA](https://en.wikipedia.org/wiki/DFA_minimization). There are some considerations though but in some cases such construction can be very handy.
 
 ## TODO
 
