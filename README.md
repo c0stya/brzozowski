@@ -12,7 +12,8 @@ It has nothing to do with classical derivative in analysis. But the symbolic nat
 
 This code implements only three operators. There are concatenation ($\cdot$), alternation ($\mid$), and Kleene star($*$).
 
-The usage is straightforward:
+Usage:
+
 ```
 > python match.py <regex> <string>
 ```
