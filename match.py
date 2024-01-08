@@ -1,149 +1,26 @@
 import sys
-
-prec = {'(': 0, '|': 1, '·': 2, '*': 3}
-
-
-# Add the concatenation operator · to the regexp, make an empty string explicit
-def augment(src):
-    if not src:
-        return 'ϵ'
-    dst = []
-    for i in range(len(src)):
-        if i > 0 and not (src[i] in '|)*' or src[i - 1] in '(|'):
-            dst.append('·')
-        dst.append(src[i])
-
-    return ''.join(dst)
+from deriv import deriv, norm, infix_to_btree, btree_to_infix, nullable
 
 
-def inorder(root):
-    if root is None:
-        return ''
-    out = inorder(root.l) + root.c + inorder(root.r)
-    if root.c in '|·*':
-        return '(' + out + ')'
-    return out
-
-
-def infix_to_postfix(exp):
-    stack = []
-    output = []
-
-    for c in exp:
-        if c.isalpha():
-            output.append(c)
-        elif c == "(":
-            stack.append(c)
-        elif c == ")":
-            while len(stack) > 0 and stack[-1] != "(":
-                output.append(stack.pop())
-            else:
-                stack.pop()
-        else:
-            while len(stack) > 0 and prec[stack[-1]] >= prec[c]:
-                output.append(stack.pop())
-            stack.append(c)
-
-    while len(stack) > 0:
-        output.append(stack.pop())
-
-    return "".join(output)
-
-
-class Node:
-    def __init__(self, data, left=None, right=None):
-        self.c = data
-        self.l = left
-        self.r = right
-
-
-def postfix_to_tree(postfix):
-    if not postfix:
-        return
-
-    stack = []
-    for c in postfix:
-        if c in "|·":
-            r, l = stack.pop(), stack.pop()
-            stack.append(Node(c, l, r))
-        elif c in "*":
-            l = stack.pop()
-            stack.append(Node(c, l))
-        else:
-            stack.append(Node(c))
-
-    return stack[-1]
-
-
-def clone(node):
-    if node is None:
-        return None
-    return Node(node.c, clone(node.l), clone(node.r))
-
-
-def nullable(node):
-    if node is None:
-        return False
-    elif node.c == 'ϵ' or node.c == '*':
-        return True
-    elif node.c == '·':
-        return nullable(node.l) and nullable(node.r)
-    elif node.c == '|':
-        return nullable(node.l) or nullable(node.r)
-    else:
-        return False
-
-
-# take a derivative with respect of a character (inplace)
-def deriv(root, c):
-    stack = [root]
-    while len(stack) > 0:
-        node = stack.pop()
-        if node is None or node.c == '∅':   # ∂ₐ(∅)     = ∅
-            continue
-        elif node.c == 'ϵ':                 # ∂ₐ(ϵ)     = ∅
-            node.c = '∅'
-        elif node.c == c:                   # ∂ₐ(a)     = ϵ
-            node.c = 'ϵ'
-        elif node.c == "|":                 # ∂ₐ(r|s)   = ∂ₐ(r) | ∂ₐ(s)
-            stack.append(node.l)
-            stack.append(node.r)
-        elif node.c == "·":                 # ∂ₐ(rs)    = ∂ₐ(r) | nullable(r) ∂ₐ(s)
-            if nullable(node.l):
-                node.c = "|"
-                dnode = Node("·", node.l, node.r)
-                node.l = dnode
-                node.r = clone(dnode.r)
-                stack.append(node.l.l)
-                stack.append(node.r)
-            else:
-                stack.append(node.l)
-        elif node.c == "*":                 # ∂ₐ(r*)    = ∂ₐ(r) r*
-            star_node = clone(node)
-            node.c = "·"
-            node.r = star_node
-            stack.append(node.l)
-        else:
-            node.c = '∅'                    # ∂ₐ(r*)    = ∅ (if a ≠ b)
-
-    return root
-
-
-def match(regex, string, show_inference=False):
-    node = postfix_to_tree(infix_to_postfix(augment(regex)))
+def match(regex, string, show_inference=True):
+    q = infix_to_btree(regex)
 
     if show_inference:
-        print(inorder(node))
+        print(btree_to_infix(q))
+
     for c in string:
-        deriv(node, c)
+        q = deriv(q, c)
+        q = norm(q)
+
         if show_inference:
-            print(inorder(node))
-    return nullable(node)
+            print("{}: {}".format(c, btree_to_infix(q)))
+
+    return nullable(q) == 'ε'
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("Usage: {} regexp string".format(sys.argv[0]))
+        print("Usage: {} <regexp> <string>".format(sys.argv[0]))
         sys.exit(1)
 
     print(match(sys.argv[1], sys.argv[2], show_inference=True))

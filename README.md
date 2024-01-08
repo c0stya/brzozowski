@@ -2,7 +2,7 @@
 
 *This code is provided for educational purposes. It is not efficient. But it illustrates the idea.*
 
-![sample derivative expression](formula.png)
+![sample derivative expression](img/formula.png)
 
 [Brzozowski derivative](https://en.wikipedia.org/wiki/Brzozowski_derivative) is a less known technique to work with regular expressions. Normally, to match a string using regex we have to construct an [automaton](https://en.wikipedia.org/wiki/Nondeterministic_finite_automaton) and simulate it. With the regex derivative technique we can use a regular expression 'directly' without the automaton construction and simulation.
 
@@ -14,7 +14,7 @@ This code implements only three operators. There are concatenation ($\cdot$), al
 
 Usage:
 
-```
+```bash
 > python match.py <regex> <string>
 ```
 
@@ -22,19 +22,19 @@ E.g.
 
 ```bash
 > python match.py '(c|b)at' 'cat'
-(((c|b)·a)·t)
-(((ϵ|∅)·a)·t)
-((((∅|∅)·a)|ϵ)·t)
-(((((∅|∅)·a)|∅)·t)|ϵ)
+(c|b)·a·t
+c: a·t
+a: t
+t: ε
 True
 ```
 
 ```bash
-> python match.py '(c|b)at' 'sat'
-(((c|b)·a)·t)
-(((∅|∅)·a)·t)
-(((∅|∅)·a)·t)
-(((∅|∅)·a)·t)
+> python match.py '(c|b)at' 'car'
+(c|b)·a·t
+c: a·t
+a: t
+r: ∅
 False
 ```
 
@@ -112,7 +112,8 @@ $$
 
 So $\partial_{cat}\left[(c \mid b)\cdot a \cdot t\right] = \epsilon$ is *nullable* and the word $cat$ matches the regexp $(c \mid b)\cdot a \cdot t$.
 
-## Algorithm
+
+## Matching algorithm
 
 There are several ways to implement the derivatives. Some implementations follow a pure functional style. Here instead I use good old imperative style to avoid hidden logic.
 
@@ -120,10 +121,36 @@ The `match.py` invokes the following functions to find out if a string matches a
 
 1. `augment`: extends the input regex with an explicit concatenation operator ($\cdot$): $c*at \to c * \cdot a \cdot t$.
 2. `infix_to_postfix`: converts the augmented regex to a [postfix expression](https://en.wikipedia.org/wiki/Reverse_Polish_notation).
-3. `postfix_to_tree`: converts the postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree).
+3. `postfix_to_tree`: converts the postfix expression to a [binary tree](https://en.wikipedia.org/wiki/Binary_tree) with tokens in leafs and operators in non-terminal nodes (update: current implementation uses plain python tuples to keep things simple).
 4. `match`: invokes `deriv` for each token of the input string. Then evaluates the regex with `nullable`.
     - `deriv`: takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
+    - `_sort`: sort the alternations in the tree using [merge sort algorithm](https://en.wikipedia.org/wiki/Merge_sort).
+    - `_norm`: simplifies expressions like $r | \varepsilon$ or $ \emptyset \cdot r$.
     - `nullable`: checks if the resulting regex (binary tree) is nullable. If it is nullable then we found a match.
+
+
+## DFA construction algorithm
+
+![Your GIF](img/dfa.gif)
+
+If we want to match multiple strings against a regular expression it is too expensive to compute the gradients for each string. We can do better. Let's pre-compute the derivatives for any possible input string.
+
+The classical way is to construct non-deterministic finite state automaton (NFA) and then convert it to DFA. With Brzozovski derivatives we can construct DFA directly.
+
+Given the regex $r$:
+
+```
+Q <- r                  queue to keep unexplored states
+D <- r                  hash table to store all found states
+while Q is not empty
+    r <- Q.pop()
+    for any c in alphabet A:
+        s = take derivative of r wrt c
+
+        if s not in dictionary D, then
+            Q.push(s)
+```
+
 
 ## Why do we need it
 
@@ -133,4 +160,5 @@ The `match.py` invokes the following functions to find out if a string matches a
 ## TODO
 
 1. Extend the derivative theory section
-2. Add the [DFA](https://en.wikipedia.org/wiki/Deterministic_finite_automaton) construction code
+2. ~~Add the [DFA](https://en.wikipedia.org/wiki/Deterministic_finite_automaton) construction code~~
+3. Explain regex normalization techniques
