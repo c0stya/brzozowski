@@ -125,7 +125,7 @@ The `match.py` invokes the following functions to find out if a string matches a
 4. `match`: invokes `deriv` for each token of the input string. Then evaluates the regex with `nullable`.
     - `deriv`: takes the derivative of the regex (now represented as a binary tree) with respect to a token of an input string. We modify the binary tree *inplace*. For some operators we have to clone a branch of the tree with the trivial recursive function `clone`.
     - `_sort`: sort the alternations in the tree using [merge sort algorithm](https://en.wikipedia.org/wiki/Merge_sort).
-    - `_norm`: simplifies expressions like $r | \varepsilon$ or $ \emptyset \cdot r$.
+    - `_norm`: simplifies expressions like $r | \varepsilon$ or $\emptyset \cdot r$.
     - `nullable`: checks if the resulting regex (binary tree) is nullable. If it is nullable then we found a match.
 
 
@@ -135,7 +135,7 @@ The `match.py` invokes the following functions to find out if a string matches a
 
 If we want to match multiple strings against a regular expression it is too expensive to compute the gradients for each string. We can do better. Let's pre-compute the derivatives for any possible input string.
 
-The classical way is to construct non-deterministic finite state automaton (NFA) and then convert it to DFA. With Brzozovski derivatives we can construct DFA directly.
+The classical way is to construct non-deterministic finite state automaton (NFA) and then convert it to DFA. With Brzozowski derivatives we can construct DFA directly.
 
 Given the regex $r$:
 
@@ -150,6 +150,37 @@ while Q is not empty
         if s not in dictionary D, then
             Q.push(s)
 ```
+
+The logic is implemented in the `construct_dfa.py` script. It includes code to construct [graphviz compatible](https://graphviz.org/) graph specification.
+
+```bash
+> python construct_dfa.py '(c|m)at'
+
+digraph G {
+	splines=true; rankdir=LR;
+	"(c|m)·a·t";
+	"(c|m)·a·t" -> "∅" [ label="a,t" ];
+	"(c|m)·a·t" -> "a·t" [ label="c,m" ];
+	"∅";
+	"∅" -> "∅" [ label="a,c,m,t" ];
+	"a·t";
+	"a·t" -> "t" [ label="a" ];
+	"a·t" -> "∅" [ label="c,m,t" ];
+	"t";
+	"t" -> "∅" [ label="a,c,m" ];
+	"t" -> "ε" [ label="t" ];
+	"ε" [peripheries=2];
+	"ε" -> "∅" [ label="a,c,m,t" ];
+}
+```
+
+The way to render it using [graphviz command line library](https://graphviz.org/doc/info/command.html):
+
+```bash
+> python construct_dfa.py '(c|m)at' | dot -Tpng > dfa.png
+```
+
+![dfa construction](img/dfa.png)
 
 
 ## Why do we need it
