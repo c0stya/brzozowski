@@ -1,15 +1,16 @@
-prec = {'(': 0, '|': 1, '·': 2, '*': 3}
+prec = {"(": 0, "|": 1, "·": 2, "*": 3}
+
 
 def augment(src):
     if not src:
-        return 'ε'
+        return "ε"
     dst = []
     for i in range(len(src)):
-        if i > 0 and not (src[i] in '|)*' or src[i - 1] in '(|'):
-            dst.append('·')
+        if i > 0 and not (src[i] in "|)*" or src[i - 1] in "(|"):
+            dst.append("·")
         dst.append(src[i])
 
-    return ''.join(dst)
+    return "".join(dst)
 
 
 def infix_to_postfix(exp):
@@ -43,16 +44,16 @@ def postfix_to_btree(postfix):
 
     stack = []
     for c in postfix:
-        if c == '|':
+        if c == "|":
             r, l = stack.pop(), stack.pop()
             stack.append((c, l, r))
-        elif c == '·':
+        elif c == "·":
             r, l = stack.pop(), stack.pop()
             stack.append((c, l, r))
         elif c in "*":
             l = stack.pop()
             stack.append((c, l))
-        else: # operand
+        else:  # operand
             stack.append(c)
 
     return stack[-1]
@@ -60,42 +61,41 @@ def postfix_to_btree(postfix):
 
 # helper: input string -> tree structure
 def infix_to_btree(regex):
-    return  postfix_to_btree(
-            infix_to_postfix(augment(regex)))
+    return postfix_to_btree(infix_to_postfix(augment(regex)))
 
 
 def nullable(q):
-    if q == 'ε':
-        return 'ε'
+    if q == "ε":
+        return "ε"
     elif len(q) == 1:
-        return '∅'
+        return "∅"
 
     if len(q) == 3:
         op, r, s = q
     else:
         op, r = q
 
-    if op == '·':
-        if nullable(r) == 'ε' and nullable(s) == 'ε':
-            return 'ε'
-    elif op == '|':
-        if nullable(r) == 'ε' or nullable(s) == 'ε':
-            return 'ε'
-    else:                           # op == '*'
-        return 'ε'
+    if op == "·":
+        if nullable(r) == "ε" and nullable(s) == "ε":
+            return "ε"
+    elif op == "|":
+        if nullable(r) == "ε" or nullable(s) == "ε":
+            return "ε"
+    else:  # op == '*'
+        return "ε"
 
-    return '∅'
+    return "∅"
 
 
 def deriv(q, c):
-    if q == '∅':                    # ∂ₐ(∅)     = ∅
-        return '∅'
-    if q == 'ε':                    # ∂ₐ(ε)     = ∅
-        return '∅'
+    if q == "∅":                    # ∂ₐ(∅)     = ∅
+        return "∅"
+    if q == "ε":                    # ∂ₐ(ε)     = ∅
+        return "∅"
     if q == c:                      # ∂ₐ(a)     = ε
-        return 'ε'
+        return "ε"
     if len(q) == 1 and q != c:      # ∂ₐ(b)     = ∅  (a ≠ b)
-        return '∅'
+        return "∅"
 
     if len(q) == 3:
         op, r, s = q
@@ -103,23 +103,13 @@ def deriv(q, c):
         op, r = q
 
     if op == "|":                   # ∂ₐ(r|s)   = ∂ₐ(r) | ∂ₐ(s)
-        return ('|',
-                deriv(r, c),
-                deriv(s, c)
-            )
-    elif op == '·':                 # ∂ₐ(rs)    = ∂ₐ(r) s | ν(r) ∂ₐ(s)
-        return ('|',
-                ('·', deriv(r, c), s),
-                ('·', nullable(r), deriv(s, c))
-            )
+        return ("|", deriv(r, c), deriv(s, c))
+    elif op == "·":                 # ∂ₐ(rs)    = ∂ₐ(r) s | ν(r) ∂ₐ(s)
+        return ("|", ("·", deriv(r, c), s), ("·", nullable(r), deriv(s, c)))
     elif op == "*":                 # ∂ₐ(r*)    = ∂ₐ(r) r*
-        return ('·',
-                deriv(r, c),
-                ('*', r)
-            )
+        return ("·", deriv(r, c), ("*", r))
     else:
-        raise ValueError(r'Unsupported op: {op}')
-
+        raise ValueError(r"Unsupported op: {op}")
 
 
 def _norm(q):
@@ -132,23 +122,23 @@ def _norm(q):
         op, r, s = q
         r_, s_ = _norm(r), _norm(s)
 
-    if op == '|':
-        if r_ == '∅':
-            return s_                               # ∅|a = a
-        elif s_ == '∅':                             # a|∅ = a
+    if op == "|":
+        if r_ == "∅":
+            return s_                   # ∅|a = a
+        elif s_ == "∅":                 # a|∅ = a
             return r_
-    elif op == '·':
-        if r_ == '∅' or s_ == '∅':                  # ∅·a = a·∅ = ∅
-            return '∅'
-        elif r_ == 'ε':                             # ε·a = a
+    elif op == "·":
+        if r_ == "∅" or s_ == "∅":      # ∅·a = a·∅ = ∅
+            return "∅"
+        elif r_ == "ε":                 # ε·a = a
             return s_
-        elif s_ == 'ε':                             # a·ε = a
+        elif s_ == "ε":                 # a·ε = a
             return r_
-    elif op == '*':
-        if len(r_) == 2:                            # (a*)* = a*
+    elif op == "*":
+        if len(r_) == 2:                # (a*)* = a*
             return r_
-        elif r_ == 'ε' or r_ == '∅':                # ε* = ε, ∅* = ε
-            return 'ε'
+        elif r_ == "ε" or r_ == "∅":    # ε* = ε, ∅* = ε
+            return "ε"
         else:
             return (op, r_)
 
@@ -164,7 +154,7 @@ def traverse(r):
         for t in s:
             for tt in traverse(t):
                 yield tt
-        yield '$'
+        yield "$"
 
 
 def compare(r, s):
@@ -209,7 +199,7 @@ def merge_sort(l, r):
 
 
 def _sort(q):
-    '''Unfold and sort'''
+    """Unfold and sort"""
     if len(q) == 1:
         return q
     if len(q) == 2:
@@ -220,20 +210,20 @@ def _sort(q):
         r, s = _sort(r), _sort(s)
         r = r[1] if op == r[0] else (r,)
         s = s[1] if op == s[0] else (s,)
-        return (op, merge_sort(r, s)) if op == '|' else (op, r + s)
+        return (op, merge_sort(r, s)) if op == "|" else (op, r + s)
 
 
 def mtree_to_btree(r):
-    if len(r) == 1:                     # reached a character
+    if len(r) == 1:  # reached a character
         return r
 
     op, s = r
-    if op == '*':
+    if op == "*":
         return (op, mtree_to_btree(s))
-    elif len(s) == 1:                   # pathalogical node of (|,(r,))
-        return mtree_to_btree(s[0])     # needs to be unpacked
-    elif len(s) == 2:                   # two final items in a tree
-        return (op, mtree_to_btree(s[0]),  mtree_to_btree(s[1]))
+    elif len(s) == 1:  # pathalogical node of (|,(r,))
+        return mtree_to_btree(s[0])  # needs to be unpacked
+    elif len(s) == 2:  # two final items in a tree
+        return (op, mtree_to_btree(s[0]), mtree_to_btree(s[1]))
     else:
         return (op, mtree_to_btree(s[0]), mtree_to_btree((op, s[1:])))
 
@@ -249,28 +239,27 @@ def btree_to_infix(q):
         elif len(q) == 2:
             op, r = q
             pop, pr = _traverse(r)
-            pr = '(' + pr + ')' if pop else pr
+            pr = "(" + pr + ")" if pop else pr
             return op, pr + op
         else:
             op, r, s = q
             popr, pr = _traverse(r)
             pops, ps = _traverse(s)
             if popr and prec[popr] < prec[op]:
-                pr = '(' + pr + ')'
+                pr = "(" + pr + ")"
             if pops and prec[pops] < prec[op]:
-                ps = '(' + ps + ')'
+                ps = "(" + ps + ")"
             return op, pr + op + ps
+
     pop, r = _traverse(q)
     return r
 
 
-if __name__ == '__main__':
-    s = '(a|(ab)*)|(abcde)*'
+if __name__ == "__main__":
+    s = "(a|(ab)*)|(abcde)*"
 
     ps = infix_to_postfix(augment(s))
     btree = postfix_to_btree(ps)
-    print (btree)
-    btree = btree_to_infix(btree)
-    print (btree)
-
-    #print (deriv_norm(btree, 'a'))
+    print(btree)
+    infx = btree_to_infix(btree)
+    print(infx)

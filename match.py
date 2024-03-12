@@ -15,10 +15,10 @@ def match(regex, string, show_inference=True):
         if show_inference:
             print("{}: {}".format(c, btree_to_infix(q)))
 
-    return nullable(q) == 'ε'
+    return nullable(q) == "ε"
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     if len(sys.argv) < 3:
         print("Usage: {} <regexp> <string>".format(sys.argv[0]))
         sys.exit(1)

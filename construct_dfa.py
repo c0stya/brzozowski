@@ -18,6 +18,7 @@ while Q is not empty
             Q.push(s)
 """
 
+
 def construct_dfa(r, A):
     Q = []
     D = {}
@@ -28,16 +29,10 @@ def construct_dfa(r, A):
     D[start] = {}
     Q.append(start)
 
-    if nullable(start) == 'ε':
+    if nullable(start) == "ε":
         finals.add(start)
 
-    i = 0
     while Q:
-        graph = dict_to_graphviz((D, start, finals))
-        i+=1
-        with open(f'img/g{i}.dot', 'w+') as h:
-            h.writelines(graph);
-
         r = Q.pop(0)
 
         for c in A:
@@ -50,7 +45,7 @@ def construct_dfa(r, A):
                 Q.append(s)
                 D[s] = {}
 
-                if nullable(s) == 'ε':
+                if nullable(s) == "ε":
                     finals.add(s)
 
     return D, start, finals
@@ -63,9 +58,9 @@ def dict_to_graphviz(dfa):
     for src, transitions in D.items():
         src_ = btree_to_infix(src)
         if src in finals:
-            arcs.append(f'"{src_}" [peripheries=2];\n')
+            arcs.append(f'"{src_}" [peripheries=2];')
         else:
-            arcs.append(f'"{src_}";\n')
+            arcs.append(f'"{src_}";')
 
         # merge labels
         dst_dict = defaultdict(lambda: [])
@@ -73,13 +68,11 @@ def dict_to_graphviz(dfa):
             dst_dict[dst].append(label)
         for dst, labels in dst_dict.items():
             dst_ = btree_to_infix(dst)
-            arcs.append(f'"{src_}" -> "{dst_}" [ label="{",".join(sorted(labels))}" ];\n')
+            arcs.append(
+                f'"{src_}" -> "{dst_}" [ label="{",".join(sorted(labels))}" ];'
+            )
 
-    return (
-        'digraph G {\n\tsplines=true; rankdir=LR;'
-        + "\n\t".join(arcs)
-        + "\n}"
-    )
+    return "digraph G {\n\tsplines=true; rankdir=LR;\n\t" + "\n\t".join(arcs) + "\n}"
 
 
 if __name__ == "__main__":
@@ -94,4 +87,4 @@ if __name__ == "__main__":
     A = sorted([c for c in set(regex) if c not in "()|*"])
 
     dfa = construct_dfa(infix_to_btree(regex), A)
-    #print(dict_to_graphviz(dfa))
+    print(dict_to_graphviz(dfa))
