@@ -45,14 +45,14 @@ The derivative of a language $L \subset \Sigma*$ with respect to a string $u \in
 For any characters *a* and *b* and for any regular expressions *r* and *s* we have following rules:
 
 $$
-\begin{aligned}
+\begin{flalign}
 \partial_a \varepsilon &= \emptyset & \\
 \partial_a a &= \epsilon & \\
 \partial_a b &= \emptyset & \text{ for }(a \neq b) \\
 \partial_a (r \cdot s) &= \partial_a r \cdot s \mid \nu(r) \cdot \partial_a s & \\
 \partial_a (r \mid s) &= \partial_a r \mid \partial_a s & \\
 \partial_a (r*) &= \partial_a r \cdot r* &
-\end{aligned}
+\end{flalign}
 $$
 
 where the function $\nu(r)$ checks if the language defined by regular expression contains an empty string ($\epsilon$). We call such regular expression *nullable*. The recursive definition of $\nu$ is:
