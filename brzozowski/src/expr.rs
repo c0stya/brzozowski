@@ -1,7 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 
-
 lazy_static! {
     static ref PREC: HashMap<char, usize> = {
         let mut m = HashMap::new();
@@ -12,7 +11,6 @@ lazy_static! {
         m
     };
 }
-
 
 #[derive(Debug)]
 pub struct Augment<I> {
@@ -25,9 +23,9 @@ pub struct Augment<I> {
     yield_curr: bool,
 }
 
-impl<I> Augment<I> 
+impl<I> Augment<I>
 where
-    I: Iterator<Item = char>
+    I: Iterator<Item = char>,
 {
     pub fn new(src: I) -> Self {
         Self {
@@ -44,7 +42,7 @@ where
 
 impl<I> Iterator for Augment<I>
 where
-    I: Iterator<Item = char>
+    I: Iterator<Item = char>,
 {
     type Item = char;
     fn next(&mut self) -> Option<Self::Item> {
@@ -64,7 +62,7 @@ where
                     return Some('ε');
                 }
                 None
-            },
+            }
             Some(char) => {
                 let mut index = self.index.unwrap_or_default();
                 if index > 0 {
@@ -77,11 +75,13 @@ where
                     // Now start checking windows.
                     self.check_prev_curr = true;
                 }
-                if self.check_prev_curr && !(matches!(self.prev, Some('(' | '|')) || matches!(self.curr, Some('|' | ')' | '*'))){
+                if self.check_prev_curr
+                    && !(matches!(self.prev, Some('(' | '|'))
+                        || matches!(self.curr, Some('|' | ')' | '*')))
+                {
                     self.yield_curr = true;
                     Some('·')
-                }
-                else {
+                } else {
                     self.curr
                 }
             }
@@ -89,18 +89,15 @@ where
     }
 }
 
-
 // /// Extends the input regex with an explicit concatenation operator.
 pub fn augment<I>(src: I) -> impl Iterator<Item = char>
 where
-    I: Iterator<Item = char>
+    I: Iterator<Item = char>,
 {
     Augment::new(src)
 }
 
-
-pub fn augment_imperative(src: &[char]) -> Vec<char> 
-{
+pub fn augment_imperative(src: &[char]) -> Vec<char> {
     if src.is_empty() {
         return vec!['ε'];
     }
@@ -123,11 +120,9 @@ pub fn infix_to_postfix(expression: &[char]) -> Result<Vec<char>, String> {
     let mut output = vec![];
 
     for &c in expression {
-
         if c.is_alphanumeric() {
             output.push(c);
-        }
-        else if c == '(' {
+        } else if c == '(' {
             stack.push(c);
         } else if c == ')' {
             while !stack.is_empty() && !matches!(stack.last(), Some('(')) {
@@ -140,8 +135,7 @@ pub fn infix_to_postfix(expression: &[char]) -> Result<Vec<char>, String> {
                 let curr_prec = *PREC.get(&c).unwrap();
                 if last_prec >= curr_prec {
                     output.push(stack.pop().unwrap());
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -155,7 +149,6 @@ pub fn infix_to_postfix(expression: &[char]) -> Result<Vec<char>, String> {
 
     Ok(output)
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 /// A tree representation of a regular expression.
@@ -171,7 +164,7 @@ pub enum Expr {
     /// The unique string of length zero.
     Epsilon,
     /// A marker for an empty set of strings spanned by this expression.
-    Empty
+    Empty,
 }
 
 impl std::fmt::Display for Expr {
@@ -182,11 +175,10 @@ impl std::fmt::Display for Expr {
             Self::Kleene(base) => write!(f, "{}*", base),
             Self::Union(left, right) => write!(f, "{}|{}", left, right),
             Self::Epsilon => write!(f, "ε"),
-            Self::Empty => write!(f, "∅")
+            Self::Empty => write!(f, "∅"),
         }
     }
 }
-
 
 impl std::str::FromStr for Expr {
     type Err = String;
@@ -207,43 +199,47 @@ impl Expr {
                     let right = stack.pop().ok_or_else(|| "empty stack".to_string())?;
                     let left = stack.pop().ok_or_else(|| "empty stack".to_string())?;
                     stack.push(Expr::Union(Box::new(left), Box::new(right)));
-                },
+                }
                 '·' => {
                     let right = stack.pop().ok_or_else(|| "empty stack".to_string())?;
                     let left = stack.pop().ok_or_else(|| "empty stack".to_string())?;
                     stack.push(Expr::Concat(Box::new(left), Box::new(right)));
-                },
+                }
                 '*' => {
                     let base = stack.pop().ok_or_else(|| "empty stack".to_string())?;
                     stack.push(Expr::Kleene(Box::new(base)));
-                },
+                }
                 '∅' => {
                     stack.push(Expr::Empty);
-                },
+                }
                 'ε' => {
                     stack.push(Expr::Epsilon);
-                },
+                }
                 _ => {
                     stack.push(Expr::Term(c));
-                },
+                }
             }
-        }        
+        }
         if stack.len() != 1 {
             return Err("expected stack to contain exactly one item at the end".to_string());
         }
         Ok(stack.pop().unwrap())
     }
 
-    /// A utility function used to check if the language defined 
+    /// A utility function used to check if the language defined
     /// by this regular expression contains an empty string.
     pub fn nulled(&self) -> Expr {
         match self {
             Self::Empty => Expr::Empty,
             Self::Term(_) => Expr::Empty,
             Self::Epsilon => Expr::Epsilon,
-            Self::Concat(left, right) => Expr::Concat(Box::new((*left).nulled()), Box::new((*right).nulled())),
-            Self::Union(left, right) => Expr::Union(Box::new((*left).nulled()), Box::new((*right).nulled())),
-            Self::Kleene(_) => Expr::Epsilon
+            Self::Concat(left, right) => {
+                Expr::Concat(Box::new((*left).nulled()), Box::new((*right).nulled()))
+            }
+            Self::Union(left, right) => {
+                Expr::Union(Box::new((*left).nulled()), Box::new((*right).nulled()))
+            }
+            Self::Kleene(_) => Expr::Epsilon,
         }
     }
 
@@ -251,43 +247,25 @@ impl Expr {
     /// any operations involving an empty set or an Epsilon.
     pub fn simplify(&self) -> Expr {
         match self {
-            Self::Concat(left, right) => {
-                match (left.as_ref(), right.as_ref()) {
-                    (Expr::Empty, _) => {
-                        Expr::Empty
-                    }
-                    (_, Expr::Empty) => {
-                        Expr::Empty
-                    },
-                    (Expr::Epsilon, x) => {
-                        x.simplify()
-                    }
-                    (x, Expr::Epsilon) => {
-                        x.simplify()
-                    },
-                    _ => Expr::Concat(Box::new(left.simplify()), Box::new(right.simplify()))
-                }
+            Self::Concat(left, right) => match (left.as_ref(), right.as_ref()) {
+                (Expr::Empty, _) => Expr::Empty,
+                (_, Expr::Empty) => Expr::Empty,
+                (Expr::Epsilon, x) => x.simplify(),
+                (x, Expr::Epsilon) => x.simplify(),
+                _ => Expr::Concat(Box::new(left.simplify()), Box::new(right.simplify())),
             },
-            Self::Union(left, right) => {
-                match (left.as_ref(), right.as_ref()) {
-                    (Expr::Empty, x) => {
-                        x.simplify()
-                    }
-                    (x, Expr::Empty) => {
-                        x.simplify()
-                    },
-                    _ => Expr::Union(Box::new(left.simplify()), Box::new(right.simplify()))
-                }
+            Self::Union(left, right) => match (left.as_ref(), right.as_ref()) {
+                (Expr::Empty, x) => x.simplify(),
+                (x, Expr::Empty) => x.simplify(),
+                _ => Expr::Union(Box::new(left.simplify()), Box::new(right.simplify())),
             },
-            Self::Kleene(base) => {
-                match base.as_ref() {
-                    Expr::Kleene(inner) => Expr::Kleene(Box::new(inner.simplify())),
-                    Expr::Empty => Expr::Epsilon,
-                    Expr::Epsilon => Expr::Epsilon,
-                    _ => Self::Kleene(Box::new(base.simplify()))
-                }
+            Self::Kleene(base) => match base.as_ref() {
+                Expr::Kleene(inner) => Expr::Kleene(Box::new(inner.simplify())),
+                Expr::Empty => Expr::Epsilon,
+                Expr::Epsilon => Expr::Epsilon,
+                _ => Self::Kleene(Box::new(base.simplify())),
             },
-            other => other.clone()
+            other => other.clone(),
         }
     }
 
@@ -309,27 +287,27 @@ impl Expr {
         self.nulled().simplify_to_end() == Expr::Epsilon
     }
 
-    /// Following these [rules], compute the Brzozowski derivative of this 
+    /// Following these [rules], compute the Brzozowski derivative of this
     /// regular expression with respect to the provided character.
-    /// 
+    ///
     /// [rules]: https://github.com/aalekhpatel07/brzozowski/tree/main?tab=readme-ov-file#definition-and-rules
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let s = "(c|b)at";
     /// let expr = s.parse::<Expr>().unwrap();
-    /// 
+    ///
     /// let derivative = expr.derivative('c');
     /// assert_eq!(format!("{}", derivative), "ε|∅·a|∅|∅·∅·t|∅|∅·∅·∅");
-    /// 
+    ///
     /// let simplified = derivative.simplify_to_end();
     /// assert_eq!(format!("{}", simplified), "a·t");
-    /// 
+    ///
     /// let derivative = expr.derivative('e');
     /// assert_eq!(format!("{}", derivative), "∅|∅·a|∅|∅·∅·t|∅|∅·∅·∅");
-    /// 
+    ///
     /// let simplified = derivative.simplify_to_end();
     /// assert_eq!(format!("{}", simplified), "∅");
     /// ```
@@ -339,42 +317,32 @@ impl Expr {
             Self::Epsilon => Self::Empty,
             Self::Term(term) if *term == c => Self::Epsilon,
             Self::Term(_) => Self::Empty,
-            Self::Concat(left, right) => {
-                Expr::Union(
-                    Box::new(Expr::Concat(
-                        Box::new(left.derivative(c)),
-                        right.clone(),
-                    )),
-                    Box::new(Expr::Concat(
-                        Box::new(left.nulled()),
-                        Box::new(right.derivative(c))
-                    )),
-                )
-            },
-            Self::Union(left, right) => {
-                Expr::Union(
-                    Box::new(left.derivative(c)),
+            Self::Concat(left, right) => Expr::Union(
+                Box::new(Expr::Concat(Box::new(left.derivative(c)), right.clone())),
+                Box::new(Expr::Concat(
+                    Box::new(left.nulled()),
                     Box::new(right.derivative(c)),
-                )
-            },
-            Self::Kleene(base) => {
-                Expr::Concat(
-                    Box::new(base.derivative(c)),
-                    Box::new(Expr::Kleene(base.clone()))
-                )
+                )),
+            ),
+            Self::Union(left, right) => {
+                Expr::Union(Box::new(left.derivative(c)), Box::new(right.derivative(c)))
             }
+            Self::Kleene(base) => Expr::Concat(
+                Box::new(base.derivative(c)),
+                Box::new(Expr::Kleene(base.clone())),
+            ),
         }
     }
 
     /// Determine whether the provided pattern matches is accepted
     /// by this regular expression.
-    /// 
+    ///
     /// # Examples
     /// ```
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let regex = "(c|b)at";
-    /// 
+    ///
     /// let expr = regex.parse::<Expr>().unwrap();
     /// assert!(expr.is_match("cat"));
     /// assert!(expr.is_match("bat"));
@@ -389,16 +357,14 @@ impl Expr {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use rand::distributions::{DistString, Standard};
-    use test_case::test_case;
     use super::Expr;
     use crate::expr;
+    use rand::distributions::{DistString, Standard};
+    use test_case::test_case;
 
     fn random_string(len: usize) -> String {
-
         let alpha = Standard;
         let mut rng = rand::thread_rng();
         alpha.sample_string(&mut rng, len)
@@ -419,13 +385,17 @@ mod tests {
     #[test_case("(c|b)at(b*a)"; "complex")]
     fn iterative(src: &str) {
         let observed_iterative = expr::augment(src.chars()).collect::<String>();
-        let observed_imperative = expr::augment_imperative(&src.chars().collect::<Vec<_>>()).into_iter().collect::<String>();
+        let observed_imperative = expr::augment_imperative(&src.chars().collect::<Vec<_>>())
+            .into_iter()
+            .collect::<String>();
         assert_eq!(observed_imperative, observed_iterative);
     }
 
     fn compare_iterative_and_imperative(src: &str) {
         let observed_iterative = super::augment(src.chars()).collect::<String>();
-        let observed_imperative = super::augment_imperative(&src.chars().collect::<Vec<_>>()).into_iter().collect::<String>();
+        let observed_imperative = super::augment_imperative(&src.chars().collect::<Vec<_>>())
+            .into_iter()
+            .collect::<String>();
         assert_eq!(observed_imperative, observed_iterative);
     }
 
@@ -455,10 +425,19 @@ mod tests {
     fn expr_btree() {
         let tree = Expr::Union(
             Box::new(Expr::Concat(
-                Box::new(Expr::Union(Box::new(Expr::Term('c')), Box::new(Expr::Term('b')))),
-                Box::new(Expr::Kleene(Box::new(Expr::Union(Box::new(Expr::Term('a')), Box::new(Expr::Term('t'))))))
+                Box::new(Expr::Union(
+                    Box::new(Expr::Term('c')),
+                    Box::new(Expr::Term('b')),
+                )),
+                Box::new(Expr::Kleene(Box::new(Expr::Union(
+                    Box::new(Expr::Term('a')),
+                    Box::new(Expr::Term('t')),
+                )))),
             )),
-            Box::new(Expr::Concat(Box::new(Expr::Term('c')), Box::new(Expr::Term('b'))))
+            Box::new(Expr::Concat(
+                Box::new(Expr::Term('c')),
+                Box::new(Expr::Term('b')),
+            )),
         );
         let expected = "c|b·a|t*|c·b";
         assert_eq!(format!("{}", tree), expected);
@@ -478,11 +457,15 @@ mod tests {
         let s = "cb|a·t·".chars().collect::<Vec<_>>();
         let expr = Expr::parse_postfix(&s).unwrap();
         assert_eq!(format!("{}", expr), "c|b·a·t");
-        assert_eq!(expr,
+        assert_eq!(
+            expr,
             Expr::Concat(
                 Box::new(Expr::Concat(
-                    Box::new(Expr::Union(Box::new(Expr::Term('c')), Box::new(Expr::Term('b')))),
-                    Box::new(Expr::Term('a')), 
+                    Box::new(Expr::Union(
+                        Box::new(Expr::Term('c')),
+                        Box::new(Expr::Term('b'))
+                    )),
+                    Box::new(Expr::Term('a')),
                 )),
                 Box::new(Expr::Term('t'))
             )
@@ -510,6 +493,4 @@ mod tests {
         let according_to_regex = compiled.is_match(pattern);
         assert_eq!(observed, according_to_regex);
     }
-
-
 }
