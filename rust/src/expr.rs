@@ -12,7 +12,7 @@ lazy_static! {
     };
 }
 
-/// An iterator over the characters of the 
+/// An iterator over the characters of the
 /// augmented regular expression, i.e. where the concatenation
 /// is injected wherever it is provided in regular expression
 /// implicitly.
@@ -31,7 +31,7 @@ impl<I> Augment<I>
 where
     I: Iterator<Item = char>,
 {
-    /// Construct a new Augment from an iterator over 
+    /// Construct a new Augment from an iterator over
     /// characters of a regular expression.
     pub fn new(src: I) -> Self {
         Self {
@@ -96,12 +96,12 @@ where
 }
 
 /// Extend the input regex with an explicit concatenation operator (`·`).
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use brzozowski;
-/// 
+///
 /// let s = "ba*(n|a)*";
 /// let augmented = brzozowski::augment(s.chars()).collect::<Vec<char>>();
 /// assert_eq!(String::from_iter(augmented), "b·a*·(n|a)*");
@@ -116,12 +116,12 @@ where
 /// Extend the input regex with an explicit concatenation operator (`·`).
 /// This is an imperative implementation as compared to the iterative implementation
 /// of [`augment`].
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use brzozowski;
-/// 
+///
 /// let s = "ba*(n|a)*";
 /// let chars = s.chars().collect::<Vec<char>>();
 /// let augmented = brzozowski::augment_imperative(&chars);
@@ -146,17 +146,17 @@ pub fn augment_imperative(src: &[char]) -> Vec<char> {
 
 /// Use the Shunting Yard algorithm to convert an infix expression to a postfix expression.
 /// This is the intermediate step to convert an infix regular expression into an [`Expr`];
-/// 
+///
 /// # Examples
-/// 
+///
 /// ```
 /// use brzozowski;
-/// 
+///
 /// let s = "ba*(n|a)*";
-/// 
+///
 /// let augmented = brzozowski::augment(s.chars()).collect::<Vec<char>>();
 /// assert_eq!(String::from_iter(&augmented), "b·a*·(n|a)*");
-/// 
+///
 /// let postfix = brzozowski::infix_to_postfix(&augmented).unwrap();
 /// assert_eq!(String::from_iter(postfix), "ba*·na|*·");
 /// ```
@@ -194,7 +194,6 @@ pub fn infix_to_postfix(expression: &[char]) -> Result<Vec<char>, String> {
 
     Ok(output)
 }
-
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
 /// A tree representation of a regular expression.
@@ -240,26 +239,26 @@ impl Expr {
     /// # Examples
     /// ```
     /// use brzozowski::{self, Expr};
-    /// 
+    ///
     /// let s = "ba*(n|a)*";
-    /// 
+    ///
     /// let augmented = brzozowski::augment(s.chars()).collect::<Vec<char>>();
     /// assert_eq!(String::from_iter(&augmented), "b·a*·(n|a)*");
-    /// 
+    ///
     /// let postfix = brzozowski::infix_to_postfix(&augmented).unwrap();
     /// assert_eq!(String::from_iter(&postfix), "ba*·na|*·");
-    /// 
+    ///
     /// let expr = Expr::parse_postfix(&postfix).unwrap();
     /// let expected = Expr::Concat(
     ///     Box::new(Expr::Concat(
-    ///         Box::new(Expr::Term('b')), 
+    ///         Box::new(Expr::Term('b')),
     ///         Box::new(Expr::Kleene(
     ///             Box::new(Expr::Term('a'))
     ///         ))
-    ///     )), 
+    ///     )),
     ///     Box::new(Expr::Kleene(
     ///         Box::new(Expr::Union(
-    ///             Box::new(Expr::Term('n')), 
+    ///             Box::new(Expr::Term('n')),
     ///             Box::new(Expr::Term('a'))
     ///         ))
     ///     ))
@@ -304,28 +303,28 @@ impl Expr {
     /// A utility function used to check if the language defined
     /// by this regular expression contains an empty string.
     /// This is almost equivalent to the [function `v(r)`] but with
-    /// a slightly different signature. 
-    /// 
+    /// a slightly different signature.
+    ///
     /// Instead of returning whether
     /// the regular expression contains the empty string directly,
     /// it returns a potentially simpler version of the regular expression
-    /// that can be used to determine the answer to that question in a more 
+    /// that can be used to determine the answer to that question in a more
     /// efficient way.
-    /// 
+    ///
     /// [function `v(r)`]: https://github.com/aalekhpatel07/brzozowski/tree/main?tab=readme-ov-file#definition-and-rules
     /// # Examples
-    /// 
+    ///
     /// ```
-    /// 
+    ///
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let expr = "(c|b)".parse::<Expr>().unwrap();
     /// let nulled = expr.nulled();
-    /// 
+    ///
     /// assert_eq!(
-    ///     nulled, 
+    ///     nulled,
     ///     Expr::Union(
-    ///         Box::new(Expr::Empty), 
+    ///         Box::new(Expr::Empty),
     ///         Box::new(Expr::Empty)
     ///     )
     /// );
@@ -347,15 +346,15 @@ impl Expr {
 
     /// Simplify the regular expression by collapsing
     /// operations involving an empty set or an Epsilon.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let expr = "((c|b)ε)*".parse::<Expr>().unwrap();
     /// let simplified = expr.simplify();
-    /// 
+    ///
     /// assert_eq!(
     ///     simplified,
     ///     Expr::Kleene(
@@ -366,7 +365,7 @@ impl Expr {
     ///     )
     /// );
     /// ```
-    /// 
+    ///
     pub fn simplify(&self) -> Expr {
         match self {
             Self::Concat(left, right) => match (left.as_ref(), right.as_ref()) {
@@ -393,15 +392,15 @@ impl Expr {
 
     /// Repeatedly simplify an expression until we come across
     /// a representation that cannot be simplified any further.
-    /// 
+    ///
     /// # Example
-    /// 
+    ///
     /// ```
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let expr = "((c|b)ε)*ε".parse::<Expr>().unwrap();
     /// let simplified = expr.simplify_to_end();
-    /// 
+    ///
     /// assert_eq!(
     ///     simplified,
     ///     Expr::Kleene(
@@ -424,15 +423,15 @@ impl Expr {
 
     /// Returns whether the language defined by this regular expression
     /// contains the empty string, Epsilon.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use brzozowski::Expr;
-    /// 
+    ///
     /// let expr = "((c|b)ε)*ε".parse::<Expr>().unwrap();
     /// assert!(expr.contains_epsilon());
-    /// 
+    ///
     /// let expr = "a(b*)ε".parse::<Expr>().unwrap();
     /// assert!(!expr.contains_epsilon());
     /// ```
