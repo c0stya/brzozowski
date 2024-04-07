@@ -4,6 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = ["Aalekh Patel <aalekh.gwpeck.7998@icloud.com"]
 readme = "../README.md"
+description = "Work with regular expressions using Brzozowski derivatives."
+license = "MIT"
+documentation = "https://crates.io/crates/brzozowski"
+homepage = "https://github.com/aalekhpatel07/brzozowski"
+repository = "https://github.com/aalekhpatel07/brzozowski"
 
 [dependencies]
 lazy_static = "1.4.0"
