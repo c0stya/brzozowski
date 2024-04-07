@@ -1,5 +1,7 @@
 # Brzozowski Derivative
 
+> Note: This is a fork of [c0stya/brzozowski](https://github.com/c0stya/brzozowski) which provides the original Python implementation. The Rust implementation has been added in [aalekhpatel07/brzozowski](https://github.com/aalekhpatel07/brzozowski) though. Visit the [crate documentation](https://docs.rs/brzozowski) for details about the Rust implementation.
+
 *This code is provided for educational purposes. It is not efficient. But it illustrates the idea.*
 
 ![sample derivative expression](img/formula.png)
