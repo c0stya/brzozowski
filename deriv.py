@@ -39,6 +39,7 @@ def infix_to_postfix(exp):
 
 
 def postfix_to_btree(postfix):
+    'Convert postfix representation to binary-tree-like structure'
     if not postfix:
         return
 

@@ -7,12 +7,13 @@ from deriv import deriv, norm, nullable, infix_to_btree, btree_to_infix
 """ Algorithm schema:
 
 Q <- r                  queue to keep unexplored states
-D <- r                  hash table to store all found states
+D <- r                  hash table to store already explored states
 while Q is not empty
     r <- Q.pop()
 
     for any c in alphabet A:
-        s = derivative of r by symbol c
+        s = take a derivative of r wrt c
+        s = normalize s
 
         if s not in dictionary D, then
             Q.push(s)
