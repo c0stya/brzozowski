@@ -1,0 +1,30 @@
+[package]
+name = "brzozowski"
+version = "0.1.2"
+edition = "2021"
+authors = ["Aalekh Patel <aalekh.gwpeck.7998@icloud.com"]
+readme = "../README.md"
+description = """
+Work with regular expressions using Brzozowski derivatives.
+""""
+license = "MIT"
+documentation = "https://docs.rs/brzozowski"
+homepage = "https://github.com/aalekhpatel07/brzozowski"
+repository = "https://github.com/aalekhpatel07/brzozowski"
+
+[dependencies]
+lazy_static = "1.4.0"
+
+[dev-dependencies]
+criterion = { version = "0.5.1", features = ["html_reports"] }
+rand = "0.8.5"
+regex = "1.10.4"
+test-case = { version = "3.3.1", features = ["regex", "with-regex"] }
+
+[[bench]]
+name = "augment"
+harness = false
+
+[[bench]]
+name = "is_match"
+harness = false
